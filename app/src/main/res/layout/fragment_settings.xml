@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SettingsFragment"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="25sp"
+            android:layout_marginTop="15dp"
+            android:textStyle="bold"
+            android:text="Ustawienia" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="35dp">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    >
+
+                    <TextView
+                        android:text="Nazwa użytkownika:"
+                        android:textSize="15sp"
+                        android:paddingEnd="10dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        />
+
+                    <EditText
+                        android:id="@+id/editDisabledNick"
+                        android:text="marcol13"
+                        android:textSize="15sp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        android:layout_marginHorizontal="20dp"
+                        />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <TextView
+                        android:text="Pierwsza synchronizacja:"
+                        android:textSize="15sp"
+                        android:paddingEnd="10dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        />
+
+                    <EditText
+                        android:id="@+id/editDisabledStartDate"
+                        android:text="27.05.2022"
+                        android:textSize="15sp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        android:layout_marginHorizontal="20dp"
+                        />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Ostatnia synchronizacja:"
+                        android:textSize="15sp"
+                        android:paddingEnd="10dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        />
+
+                    <EditText
+                        android:id="@+id/editDisabledEndDate"
+                        android:text="28.05.2022"
+                        android:textSize="15sp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        android:layout_marginHorizontal="20dp"
+                        />
+
+                </TableRow>
+
+            </TableLayout>
+
+            <Button
+                android:id="@+id/syncButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="35dp"
+                android:layout_gravity="center"
+                android:text="🔄 Synchronizuj" />
+
+            <Button
+                android:id="@+id/eraseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"
+                android:text="🗑 Wyczyść dane" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
