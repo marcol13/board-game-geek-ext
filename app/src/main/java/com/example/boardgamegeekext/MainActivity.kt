@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     private val homeFragment = HomeFragment()
     private val settingsFragment = SettingsFragment()
+    private val listFragment = ListFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
             when(it.itemId){
                 R.id.nav_home -> setCurrentFragment(homeFragment)
                 R.id.nav_settings -> setCurrentFragment(settingsFragment)
+                R.id.nav_list -> setCurrentFragment(listFragment)
             }
             true
         })
