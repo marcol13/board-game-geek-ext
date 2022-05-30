@@ -2,8 +2,10 @@ package com.example.boardgamegeekext
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import com.example.boardgamegeekext.database.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.navigation.NavigationBarView
@@ -20,6 +22,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val dbHandler = DatabaseHelper(this, null, null, 1)
+        val user = User("Marcin", "marcol13")
+
+        dbHandler.addUser(user)
+
+//        var user2 : User? = null
+//
+//        user2 = dbHandler.selectUserInfo()
+//
+//        Log.d("2137", user2!!.nickname)
+
         bottomNavigation = findViewById(R.id.bottom_navigation)
 
         setCurrentFragment(homeFragment)
@@ -32,8 +45,6 @@ class MainActivity : AppCompatActivity() {
             }
             true
         })
-
-
     }
 
     private fun setCurrentFragment(fragment: Fragment) {

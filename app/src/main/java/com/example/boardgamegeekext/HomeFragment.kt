@@ -1,10 +1,13 @@
 package com.example.boardgamegeekext
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import com.example.boardgamegeekext.database.User
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -33,8 +36,19 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
+
+        val homeView = inflater.inflate(R.layout.fragment_home, container, false)
+
+        val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
+        val user = dbHandler.selectUserInfo()
+
+        val nameTextView : TextView = homeView.findViewById(R.id.hello_name)
+        val nickTextView : TextView = homeView.findViewById(R.id.nick_name)
+
+        nameTextView.text = "Cześć " + (user?.name ?: "Nieznajomy") + "!"
+        nickTextView.text = "\uD83D\uDC64 " + (user?.nickname ?: "nickname")
+
+        return homeView
     }
 
     companion object {
