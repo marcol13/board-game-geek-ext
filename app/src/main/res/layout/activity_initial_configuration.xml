@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".InitialConfiguration"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="35sp"
+            android:layout_marginTop="15dp"
+            android:textStyle="bold"
+            android:text="Witaj! 👋" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="40dp"
+            android:paddingHorizontal="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="Aby skorzystać z aplikacji konieczne jest podanie swojej nazwy użytkownika z portalu BoardGameGeek. Jeżeli posiadasz konto na tej platformie uzupełnij poniższe dane, w przeciwnym wypadku najpierw zarejestruj się na boardgamegeek.com"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:textAlignment="center"
+                android:textStyle="bold"
+                android:text="Podaj nazwę użytkownika do BGG:"/>
+
+            <EditText
+                android:id="@+id/nick_name_initial_edit"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="50dp"
+                android:textAlignment="center"
+                />
+
+            <Button
+                android:id="@+id/accept_nick_name_initial_button"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="30dp"
+                android:text="Przejdź do aplikacji"/>
+
+            <TextView
+                android:id="@+id/error_initial_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:textAlignment="center"
+                android:textStyle="bold"
+                android:textColor="@color/red"
+                android:text=""/>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/go_to_website_initial_button"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="30dp"
+                android:text="Zarejestruj się w BGG"
+                android:layout_marginBottom="40dp"
+                android:layout_gravity="bottom"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.boardgamegeekext
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -22,16 +23,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val intent = Intent(this, InitialConfiguration::class.java)
+        startActivity(intent)
+
         val dbHandler = DatabaseHelper(this, null, null, 1)
         val user = User("Marcin", "marcol13")
 
         dbHandler.addUser(user)
-
-//        var user2 : User? = null
-//
-//        user2 = dbHandler.selectUserInfo()
-//
-//        Log.d("2137", user2!!.nickname)
 
         bottomNavigation = findViewById(R.id.bottom_navigation)
 
