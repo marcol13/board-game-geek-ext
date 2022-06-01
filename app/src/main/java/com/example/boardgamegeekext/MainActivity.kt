@@ -6,10 +6,15 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import com.example.boardgamegeekext.api.RetrofitInstance
+import com.example.boardgamegeekext.api.UserApi
 import com.example.boardgamegeekext.database.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.navigation.NavigationBarView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +35,22 @@ class MainActivity : AppCompatActivity() {
         val user = User("Marcin", "marcol13")
 
         dbHandler.addUser(user)
+
+        val response = RetrofitInstance.api.getUser().enqueue(object : Callback<UserApi> {
+            override fun onFailure(call: Call<UserApi>?, t: Throwable?) {
+                Log.v("retrofit", "call failed")
+            }
+
+            override fun onResponse(call: Call<UserApi>?, response: Response<UserApi>?) {
+//                data.value = response!!.body()!!.articles
+                Log.d("SIEMA", response?.body()?.nickname.toString())
+            }
+
+        })
+
+
+
+
 
         bottomNavigation = findViewById(R.id.bottom_navigation)
 
