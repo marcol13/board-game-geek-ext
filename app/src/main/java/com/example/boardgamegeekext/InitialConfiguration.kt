@@ -98,7 +98,7 @@ class InitialConfiguration : AppCompatActivity() {
                     runBlocking {
                         val job = launch(Dispatchers.Default){
                             lateinit var avatar : ByteArray
-                            if(image != ""){
+                            if(image != "" && image != "N/A"){
                                 Log.d("SIEMA", image)
                                 val url = URL(image)
                                 val connection = url.openConnection()
@@ -107,6 +107,9 @@ class InitialConfiguration : AppCompatActivity() {
                                 avatar = InputStream.readBytes()
                                 InputStream.close()
                                 Log.d("SIEMA", "sukces")
+                            }
+                            else{
+                                avatar = ByteArray(0)
                             }
 
                             user = User(name, nickname, avatar)
