@@ -19,7 +19,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
 
         val CREATE_HISTORY_TABLE = ("CREATE TABLE $HISTORY_TABLE_NAME ($HISTORY_GAME_ID INTEGER, $HISTORY_SYNC_ID INTEGER, $HISTORY_RANKING_POSITION INTEGER, FOREIGN KEY($HISTORY_GAME_ID) REFERENCES $GAME_TABLE_NAME($GAME_ID), FOREIGN KEY($HISTORY_SYNC_ID) REFERENCES $SYNC_TABLE_NAME($SYNC_ID))")
 
-        val CREATE_USER_TABLE = ("CREATE TABLE $USER_TABLE_NAME($USER_ID INTEGER PRIMARY KEY, $USER_NAME TEXT, $USER_NICK TEXT)")
+        val CREATE_USER_TABLE = ("CREATE TABLE $USER_TABLE_NAME($USER_ID INTEGER PRIMARY KEY, $USER_NAME TEXT, $USER_NICK TEXT, $USER_IMAGE BLOB)")
 
         db?.execSQL(CREATE_GAME_TABLE)
         db?.execSQL(CREATE_SYNC_TABLE)
@@ -71,9 +71,18 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         val values = ContentValues()
         values.put(USER_NAME, user.name)
         values.put(USER_NICK, user.nickname)
+        values.put(USER_IMAGE, user.image)
         val db = this.writableDatabase
         db.insert(USER_TABLE_NAME, null, values)
         db.close()
+    }
+
+    fun clearDatabase(){
+        val db = this.writableDatabase
+        db?.execSQL("DELETE FROM $USER_TABLE_NAME")
+        db?.execSQL("DELETE FROM $HISTORY_TABLE_NAME")
+        db?.execSQL("DELETE FROM $SYNC_TABLE_NAME")
+        db?.execSQL("DELETE FROM $GAME_TABLE_NAME")
     }
 
     fun selectUserInfo() : User?{
@@ -85,7 +94,8 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         if(cursor.moveToFirst()){
             val name = cursor.getString(1)
             val nickname = cursor.getString(2)
-            user = User(name, nickname)
+            val image = cursor.getBlob(3)
+            user = User(name, nickname, image)
             cursor.close()
         }
         db.close()
@@ -117,6 +127,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         val USER_ID = "_id"
         val USER_NAME = "user_name"
         val USER_NICK = "user_nick"
+        val USER_IMAGE = "user_image"
 
     }
 

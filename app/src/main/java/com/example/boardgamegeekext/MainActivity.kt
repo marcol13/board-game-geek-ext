@@ -28,27 +28,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val intent = Intent(this, InitialConfiguration::class.java)
-        startActivity(intent)
+//        val intent = Intent(this, InitialConfiguration::class.java)
+//        startActivity(intent)
 
-        val dbHandler = DatabaseHelper(this, null, null, 1)
-        val user = User("Marcin", "marcol13")
-
-        dbHandler.addUser(user)
-
-        val response = RetrofitInstance.api.getUser().enqueue(object : Callback<UserApi> {
-            override fun onFailure(call: Call<UserApi>?, t: Throwable?) {
-                Log.v("retrofit", "call failed")
-            }
-
-            override fun onResponse(call: Call<UserApi>?, response: Response<UserApi>?) {
-//                data.value = response!!.body()!!.articles
-                Log.d("SIEMA", response?.body()?.nickname.toString())
-            }
-
-        })
-
-
+//        val dbHandler = DatabaseHelper(this, null, null, 1)
+//        val user = User("Marcin", "marcol13")
+//
+//        dbHandler.addUser(user)
 
 
 

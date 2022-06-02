@@ -1,13 +1,13 @@
 package com.example.boardgamegeekext
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
-import com.example.boardgamegeekext.database.User
+import androidx.fragment.app.Fragment
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,9 +44,22 @@ class HomeFragment : Fragment() {
 
         val nameTextView : TextView = homeView.findViewById(R.id.hello_name)
         val nickTextView : TextView = homeView.findViewById(R.id.nick_name)
+        val avatarImageView : ImageView = homeView.findViewById(R.id.avatar_image)
 
         nameTextView.text = "Cześć " + (user?.name ?: "Nieznajomy") + "!"
         nickTextView.text = "\uD83D\uDC64 " + (user?.nickname ?: "nickname")
+
+        if(!user?.image.contentEquals(ByteArray(0))){
+            val options = BitmapFactory.Options()
+            options.inDither = false
+            options.inPurgeable = true
+            options.inInputShareable = true
+
+            val bm = BitmapFactory.decodeByteArray(user?.image, 0, user?.image!!.size, options);
+            avatarImageView.setImageBitmap(bm);
+        }
+
+
 
         return homeView
     }

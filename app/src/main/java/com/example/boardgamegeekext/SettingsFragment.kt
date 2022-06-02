@@ -1,11 +1,13 @@
 package com.example.boardgamegeekext
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 
@@ -37,6 +39,14 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val settingsView : View = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        val eraseButton : Button = settingsView.findViewById(R.id.eraseButton)
+
+        eraseButton.setOnClickListener {
+            val intent = Intent(requireActivity(), InitialConfiguration::class.java)
+            intent.putExtra("ERASE_DATA", "true");
+            startActivity(intent)
+        }
 
         val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         val user = dbHandler.selectUserInfo()

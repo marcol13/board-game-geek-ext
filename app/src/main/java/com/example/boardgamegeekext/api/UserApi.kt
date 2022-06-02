@@ -11,12 +11,23 @@ data class UserApi @JvmOverloads constructor(
     @param:Element(name = "firstname")
     var name: Name? = null,
 
+    @field:Element(name = "avatarlink")
+    @param:Element(name = "avatarlink")
+    var avatar: Avatar? = null,
+
     @field:Attribute(name = "name", required = true)
     var nickname: String? = "",
+
+
 
 )
 
 @Root(name = "firstname", strict = false)
 class Name {
     @field:Attribute(name = "value", required = false) var name: String = ""
+}
+
+@Root(name = "avatarlink", strict = false)
+class Avatar {
+    @field:Attribute(name = "value", required = false) var avatar: String = ""
 }
