@@ -8,14 +8,12 @@ class Game {
     var polishTitle : String? = null
     var title : String = ""
     var isExtension : Boolean = false
-    @RequiresApi(Build.VERSION_CODES.O)
-    var publishDate : LocalDate = LocalDate.of(2022,1,1)
+    var publishDate : String = ""
     var thumbnail : ByteArray = ByteArray(0)
 
-    constructor(title: String, polishTitle: String, isExtension: Boolean, publishDate: LocalDate,
+    constructor(title: String, isExtension: Boolean, publishDate: String,
                 thumbnail: ByteArray){
         this.title = title
-        this.polishTitle = polishTitle
         this.isExtension = isExtension
         this.publishDate = publishDate
         this.thumbnail = thumbnail

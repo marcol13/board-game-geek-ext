@@ -2,6 +2,7 @@ package com.example.boardgamegeekext
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +42,9 @@ class ListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
+        val games = dbHandler.selectGamesList()
+
         val listView : View = inflater.inflate(R.layout.fragment_list, container, false)
 
         val scrollContainer : ScrollView = listView.findViewById(R.id.scroll_container)
@@ -59,8 +63,10 @@ class ListFragment : Fragment() {
             spinner.adapter = adapter
         }
 
-        for(i in 0..10){
-            var itemList = ListItemFragment.newInstance((i+1).toString() + ".", "def")
+        for(i in 0 until games.size){
+            var el = games.get(i)
+            Log.d("MOŻE TU DZIALA", el.isExtension.toString())
+            var itemList = ListItemFragment.newInstance((i+1).toString() + ".", el.title, el.publishedDate, el.isExtension, el.thumbnail, el.rank)
 
             fragmentManager?.beginTransaction()?.add(ll.id, itemList, "tag")?.commit()
         }

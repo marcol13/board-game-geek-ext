@@ -47,6 +47,7 @@
                             android:paddingEnd="5dp"/>
 
                         <TextView
+                            android:id="@+id/last_sync_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🔄 28.05.2022"

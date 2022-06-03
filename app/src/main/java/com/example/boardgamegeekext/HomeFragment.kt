@@ -1,13 +1,16 @@
 package com.example.boardgamegeekext
 
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import java.time.format.DateTimeFormatter
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -32,6 +35,7 @@ class HomeFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,13 +45,18 @@ class HomeFragment : Fragment() {
 
         val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         val user = dbHandler.selectUserInfo()
+        val lastSync = dbHandler.selectLastSyncInfo()
 
         val nameTextView : TextView = homeView.findViewById(R.id.hello_name)
         val nickTextView : TextView = homeView.findViewById(R.id.nick_name)
+        val lastSyncTextView : TextView = homeView.findViewById(R.id.last_sync_date)
         val avatarImageView : ImageView = homeView.findViewById(R.id.avatar_image)
+
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
         nameTextView.text = "Cześć " + (user?.name ?: "Nieznajomy") + "!"
         nickTextView.text = "\uD83D\uDC64 " + (user?.nickname ?: "nickname")
+        lastSyncTextView.text = "\uD83D\uDD04 ${lastSync?.syncDate?.format(formatter)}"
 
         if(!user?.image.contentEquals(ByteArray(0))){
             val options = BitmapFactory.Options()

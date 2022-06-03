@@ -1,15 +1,18 @@
 package com.example.boardgamegeekext
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,6 +37,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,6 +54,10 @@ class SettingsFragment : Fragment() {
 
         val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         val user = dbHandler.selectUserInfo()
+        val firstSync = dbHandler.selectFirstSyncInfo()
+        val lastSync = dbHandler.selectLastSyncInfo()
+
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
         val disabledEditTextNick : EditText = settingsView.findViewById(R.id.editDisabledNick)
 //        disabledEditTextNick.text = (user?.nickname ?: "nickname") as Editable?
@@ -57,9 +65,13 @@ class SettingsFragment : Fragment() {
         disabledEditTextNick.isEnabled = false
 
         val disabledEditTextStartDate : EditText = settingsView.findViewById(R.id.editDisabledStartDate)
+        val startDateValue = firstSync?.syncDate
+        disabledEditTextStartDate.setText((startDateValue?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         disabledEditTextStartDate.isEnabled = false
 
         val disabledEditTextEndDate : EditText = settingsView.findViewById(R.id.editDisabledEndDate)
+        val endDateValue = lastSync?.syncDate
+        disabledEditTextEndDate.setText((endDateValue?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         disabledEditTextEndDate.isEnabled = false
 
         // Inflate the layout for this fragment

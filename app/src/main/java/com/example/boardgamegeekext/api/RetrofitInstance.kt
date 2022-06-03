@@ -1,6 +1,5 @@
 package com.example.boardgamegeekext.api
 
-import android.provider.Telephony.TextBasedSmsColumns.BODY
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
