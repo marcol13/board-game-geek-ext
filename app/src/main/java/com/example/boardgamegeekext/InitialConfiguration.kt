@@ -108,12 +108,16 @@ class InitialConfiguration : AppCompatActivity() {
                     Log.d("DUPA", "teraz jest git")
                     thumbnail = response?.body()?.name?.thumbnail.toString()
                     type = response?.body()?.name?.type.toString()
+                    Log.d("RESPONSE", response.toString())
+                    if(response.code() != 200){
+                        throw Exception()
+                    }
                     Log.d("SIEMA22222", type)
                     flag = true
 
                 } catch (e: Exception) {
-                    //            Thread.sleep(1_000)
-                    //            getDetailedData(id)
+                    Thread.sleep(500)
+                    getDetailedData(id)
                     Log.d("DUPA", e.stackTraceToString())
                 }
             }

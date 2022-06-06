@@ -1,16 +1,32 @@
 package com.example.boardgamegeekext
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import com.example.boardgamegeekext.api.*
+import com.example.boardgamegeekext.database.Game
+import com.example.boardgamegeekext.database.HistoryRanking
+import com.example.boardgamegeekext.database.Synchronization
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -28,6 +44,7 @@ class SettingsFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    lateinit var progressBar : ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +61,19 @@ class SettingsFragment : Fragment() {
     ): View? {
         val settingsView : View = inflater.inflate(R.layout.fragment_settings, container, false)
 
+        progressBar = settingsView.findViewById(R.id.settings_progress_bar)
+
+        val syncButton : Button = settingsView.findViewById(R.id.syncButton)
         val eraseButton : Button = settingsView.findViewById(R.id.eraseButton)
+
+        val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
+        val user = dbHandler.selectUserInfo()
+        val firstSync = dbHandler.selectFirstSyncInfo()
+        val lastSync = dbHandler.selectLastSyncInfo()
+
+        syncButton.setOnClickListener{
+            showDialog(user!!.nickname)
+        }
 
         eraseButton.setOnClickListener {
             val intent = Intent(requireActivity(), InitialConfiguration::class.java)
@@ -52,10 +81,7 @@ class SettingsFragment : Fragment() {
             startActivity(intent)
         }
 
-        val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
-        val user = dbHandler.selectUserInfo()
-        val firstSync = dbHandler.selectFirstSyncInfo()
-        val lastSync = dbHandler.selectLastSyncInfo()
+
 
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
@@ -76,6 +102,158 @@ class SettingsFragment : Fragment() {
 
         // Inflate the layout for this fragment
         return settingsView
+    }
+
+    fun showDialog(nickname: String){
+        val dialog : Dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(true)
+        dialog.setContentView(R.layout.dialog)
+
+        val deleteYes = dialog.findViewById<Button>(R.id.delete_yes)
+        val deleteNo = dialog.findViewById<Button>(R.id.delete_no)
+
+        deleteYes.setOnClickListener {
+            dialog.dismiss()
+            synchronizeGames(nickname, true)
+        }
+
+        deleteNo.setOnClickListener {
+            dialog.dismiss()
+            synchronizeGames(nickname, false)
+        }
+
+        dialog.show()
+    }
+
+    fun synchronizeGames(nickname : String, isDeleted : Boolean){
+        var games : ArrayList<Game> = ArrayList()
+        var ranks  : ArrayList<HistoryRanking> = ArrayList()
+        progressBar.visibility = View.VISIBLE
+        val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
+        RetrofitInstance.api.getCollection(nickname, "1").enqueue(object : Callback<CollectionApi> {
+
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onResponse(
+                call: Call<CollectionApi>,
+                response: Response<CollectionApi>
+            ) {
+                var name = response?.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
+                val gamesResponse = response?.body()?.itemList
+                val nextId = dbHandler.selectNextSyncIndex()
+
+                val synchronization = Synchronization(LocalDateTime.now())
+                dbHandler.addSync(synchronization)
+//
+                for(i in gamesResponse?.indices!!){
+                    var el = gamesResponse.get(i)
+                    var resultData = getDetailedData(el.objectid)
+                    var imageData = ByteArray(0)
+                    var isExtension = false
+                    var rankPositionList = el.stats?.rating?.ranks?.rank
+                    var rankingPosition = getRanking(rankPositionList!!)
+
+                    Log.d("TU MOZE BYC COS ZLE", resultData[0])
+
+                    if(resultData[0] != ""){
+                        runBlocking {
+                            val job: Job = launch(Dispatchers.Default) {
+                                try{
+                                    imageData = loadImage(resultData[0])
+                                }catch(e: Exception){
+                                    imageData = ByteArray(0)
+                                }
+                            }
+                        }
+                    }
+                    Log.d("CAN WE SKIP", resultData[1])
+                    if(resultData[1] == "boardgameexpansion"){
+                        Log.d("QWERTY", "CCCCCCCCC")
+                        isExtension = true
+                    }
+                    Log.d("TO THE GOOD PART", isExtension.toString())
+                    games.add(Game(el.objectid.toInt(), el.name, isExtension, el.year ?: "-1", imageData))
+                    Log.d("ABDER", "${el.objectid} ${nextId} ${rankingPosition}")
+                    ranks.add(HistoryRanking(el.objectid.toInt(), nextId!!, rankingPosition))
+                }
+                if(isDeleted){
+                    dbHandler.clearGames()
+                }
+                games.forEach{el -> dbHandler.addGame(el)}
+                ranks.forEach{el -> dbHandler.addHistory(el)}
+
+                progressBar.visibility = View.GONE
+
+                Log.d("SIEMA2137", name)
+            }
+
+            override fun onFailure(call: Call<CollectionApi>, t: Throwable) {
+                Log.v("retrofit321", t.stackTraceToString())
+                Thread.sleep(1_000)
+                synchronizeGames(nickname, isDeleted)
+            }
+        })
+    }
+
+    fun getRanking(rankPositionList : List<RankInstance>) : Int{
+        for(j in 0 until (rankPositionList?.size!!)){
+            var temp = rankPositionList.get(j)
+            var result = -1
+            if(temp.type == "subtype")
+                result = try{
+                    temp.value.toInt()
+                }catch (e: NumberFormatException){
+                    -1
+                }
+            return result
+        }
+        return -1
+    }
+
+    fun getDetailedData(id : String): ArrayList<String> {
+        var flag = false
+        var thumbnail = ""
+        var type = ""
+
+        var apiService : ApiRequest = RetrofitInstance.api
+        var call : Call<DetailedGameDataApi> = apiService.getDetailedGameData(id)
+
+        runBlocking {
+            val job: Job = launch(Dispatchers.Default) {
+
+                try {
+                    var response: Response<DetailedGameDataApi> = call.execute()
+                    Log.d("DUPA", "teraz jest git")
+                    thumbnail = response?.body()?.name?.thumbnail.toString()
+                    type = response?.body()?.name?.type.toString()
+                    Log.d("RESPONSE", response.toString())
+                    if(response.code() != 200){
+                        throw Exception()
+                    }
+                    flag = true
+
+                } catch (e: Exception) {
+                    Thread.sleep(500)
+                    getDetailedData(id)
+                    Log.d("DUPA", e.stackTraceToString())
+                }
+            }
+        }
+        Log.d("TU COS", "HALOOOO")
+        if(!flag){
+            return arrayListOf("", "")
+        }
+        return arrayListOf(thumbnail, type)
+    }
+
+    fun loadImage(urlArg : String) : ByteArray{
+        val url = URL(urlArg)
+        val connection = url.openConnection()
+        connection.connect()
+        val InputStream = connection.getInputStream()
+        val result = InputStream.readBytes()
+        InputStream.close()
+        return result
     }
 
     companion object {

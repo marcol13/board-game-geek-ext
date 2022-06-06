@@ -100,6 +100,24 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         db?.execSQL("DELETE FROM $GAME_TABLE_NAME")
     }
 
+    fun clearGames(){
+        val db = this.writableDatabase
+        db?.execSQL("DELETE FROM $GAME_TABLE_NAME")
+    }
+
+    fun selectLastRanking(gameId : Int) : Int{
+        val query = "SELECT $HISTORY_RANKING_POSITION FROM $HISTORY_TABLE_NAME WHERE $HISTORY_GAME_ID = $gameId ORDER BY $HISTORY_SYNC_ID DESC LIMIT 1"
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(query, null)
+        var result = 0
+        if(cursor.moveToFirst()){
+            result = cursor.getInt(0)
+            cursor.close()
+        }
+        db.close()
+        return result
+    }
+
     fun selectNextSyncIndex() : Int{
         val query = "SELECT $SYNC_ID FROM $SYNC_TABLE_NAME ORDER BY $SYNC_ID DESC LIMIT 1"
         val db = this.readableDatabase
@@ -117,8 +135,9 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     fun selectGamesList() : ArrayList<GameListResponse>{
         val syncId = selectNextSyncIndex() - 1
         Log.d("DEEBUG2115", syncId.toString())
-        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
-//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB FROM $GAME_TABLE_NAME"
+//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
+//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
+        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB FROM $GAME_TABLE_NAME"
         val db = this.readableDatabase
         Log.d("UUUUU", query)
         val cursor = db.rawQuery(query, null)
@@ -132,7 +151,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
                 Log.d("TUUUU TUUUU UUUUU UUU", isExt.toString())
                 val publishDate = cursor.getString(3)
                 val thumbnail = cursor.getBlob(4)
-                val ranking = cursor.getInt(5)
+                val ranking = selectLastRanking(id)
 //                val ranking = 1
 
                 gameList.add(GameListResponse(id,  title, publishDate, thumbnail, ranking, isExt))

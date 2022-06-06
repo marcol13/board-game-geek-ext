@@ -18,3 +18,9 @@ class ItemElement @JvmOverloads constructor(
     @field:Attribute(name = "type")
     var type : String = ""
 )
+
+//@Root(name="error", strict = false)
+//class Error @JvmOverloads  constructor(
+//    @field:Element(name = "message", required = false)
+//    var message : String = ""
+//)
