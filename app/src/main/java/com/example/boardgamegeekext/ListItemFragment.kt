@@ -111,7 +111,10 @@ class ListItemFragment : Fragment() {
             thumbnailImageView.setImageBitmap(bm);
         }
 
-        rankText.text = "\uD83C\uDFC6\n" + arguments?.getInt("rank").toString()
+        var rankPositionText = arguments?.getInt("rank").toString()
+        if(rankPositionText == "-1")
+            rankPositionText = "0"
+        rankText.text = "\uD83C\uDFC6\n" + rankPositionText
 
         // Inflate the layout for this fragment
         return itemView

@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,7 @@ class InitialConfiguration : AppCompatActivity() {
     private lateinit var goToApp : Button
     lateinit var registerInWebsite : Button
     lateinit var nicknameEdit : EditText
+    lateinit var progressBar : ProgressBar
 
     var userNickname = ""
 
@@ -39,6 +41,7 @@ class InitialConfiguration : AppCompatActivity() {
         goToApp = findViewById(R.id.accept_nick_name_initial_button)
         registerInWebsite = findViewById(R.id.go_to_website_initial_button)
         nicknameEdit = findViewById(R.id.nick_name_initial_edit)
+        progressBar = findViewById(R.id.initial_progress_bar)
 
         val flag = intent.getStringExtra("ERASE_DATA")
         if (!flag.equals("true")) {
@@ -52,11 +55,11 @@ class InitialConfiguration : AppCompatActivity() {
             }
         }
 
-
         goToApp.setOnClickListener(object: View.OnClickListener {
 
             override fun onClick(arg0: View?){
                 val nicknameText = nicknameEdit.text.toString()
+                progressBar.visibility = View.VISIBLE
                 var fetchUser = false
                 do{
                     fetchUser = findUser(nicknameText)
@@ -177,20 +180,28 @@ class InitialConfiguration : AppCompatActivity() {
                     if(resultData[0] != ""){
                         runBlocking {
                             val job: Job = launch(Dispatchers.Default) {
-                                imageData = loadImage(resultData[0])
+                                try{
+                                    imageData = loadImage(resultData[0])
+                                }catch(e: Exception){
+                                    imageData = ByteArray(0)
+                                }
                             }
                         }
                     }
                     Log.d("CAN WE SKIP", resultData[1])
                     if(resultData[1] == "boardgameexpansion"){
+                        Log.d("QWERTY", "CCCCCCCCC")
                         isExtension = true
                     }
                     Log.d("TO THE GOOD PART", isExtension.toString())
-                    games.add(Game(el.name, isExtension, el.year, imageData))
+                    games.add(Game(el.objectid.toInt(), el.name, isExtension, el.year ?: "-1", imageData))
+                    Log.d("ABDER", "${el.objectid} ${nextId} ${rankingPosition}")
                     ranks.add(HistoryRanking(el.objectid.toInt(), nextId!!, rankingPosition))
                 }
                 games.forEach{el -> dbHandler.addGame(el)}
                 ranks.forEach{el -> dbHandler.addHistory(el)}
+
+                progressBar.visibility = View.GONE
 
                 goToMainActivity()
 

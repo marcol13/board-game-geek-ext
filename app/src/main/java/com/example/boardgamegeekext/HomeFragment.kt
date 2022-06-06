@@ -46,17 +46,23 @@ class HomeFragment : Fragment() {
         val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         val user = dbHandler.selectUserInfo()
         val lastSync = dbHandler.selectLastSyncInfo()
+        val gameAmountValue = dbHandler.selectGamesAmount()
+        val extensionAmountValue = dbHandler.selectExtensionAmount()
 
         val nameTextView : TextView = homeView.findViewById(R.id.hello_name)
         val nickTextView : TextView = homeView.findViewById(R.id.nick_name)
         val lastSyncTextView : TextView = homeView.findViewById(R.id.last_sync_date)
         val avatarImageView : ImageView = homeView.findViewById(R.id.avatar_image)
+        val gamesAmount : TextView = homeView.findViewById(R.id.games_amount)
+        val extensionAmount : TextView = homeView.findViewById(R.id.extension_amount)
 
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
         nameTextView.text = "Cześć " + (user?.name ?: "Nieznajomy") + "!"
         nickTextView.text = "\uD83D\uDC64 " + (user?.nickname ?: "nickname")
         lastSyncTextView.text = "\uD83D\uDD04 ${lastSync?.syncDate?.format(formatter)}"
+        gamesAmount.text = "Posiadanych gier: $gameAmountValue"
+        extensionAmount.text = "Dodatki: $extensionAmountValue"
 
         if(!user?.image.contentEquals(ByteArray(0))){
             val options = BitmapFactory.Options()

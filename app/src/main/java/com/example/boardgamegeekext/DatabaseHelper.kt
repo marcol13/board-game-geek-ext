@@ -2,7 +2,9 @@ package com.example.boardgamegeekext
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteDatabase.CONFLICT_REPLACE
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import android.util.Log
@@ -11,6 +13,7 @@ import com.example.boardgamegeekext.database.Game
 import com.example.boardgamegeekext.database.HistoryRanking
 import com.example.boardgamegeekext.database.Synchronization
 import com.example.boardgamegeekext.database.User
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -43,12 +46,20 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     fun addGame(game: Game){
 //        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val values = ContentValues()
+        values.put(GAME_ID, game.id)
         values.put(GAME_TITLE_ORIGINAL, game.title)
         values.put(GAME_IS_EXT, game.isExtension)
         values.put(GAME_PUBLISH_DATE, game.publishDate)
         values.put(GAME_IMG_THUMB, game.thumbnail)
         val db = this.writableDatabase
-        db.insert(GAME_TABLE_NAME, null, values)
+        try{
+//            @Insert(onConflict = OnConflictStrategy.REPLACE)
+//            db.insert(GAME_TABLE_NAME, null, values)
+            db.insertWithOnConflict(GAME_TABLE_NAME, null, values, CONFLICT_REPLACE)
+        }catch(e: SQLiteConstraintException){
+            Log.d("BLAD", "COS NIE DZIALA")
+        }
+
         db.close()
     }
 
@@ -106,9 +117,10 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     fun selectGamesList() : ArrayList<GameListResponse>{
         val syncId = selectNextSyncIndex() - 1
         Log.d("DEEBUG2115", syncId.toString())
-//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
-        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB FROM $GAME_TABLE_NAME"
+        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
+//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB FROM $GAME_TABLE_NAME"
         val db = this.readableDatabase
+        Log.d("UUUUU", query)
         val cursor = db.rawQuery(query, null)
         var gameList = ArrayList<GameListResponse>()
         if(cursor.moveToFirst()) {
@@ -120,8 +132,8 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
                 Log.d("TUUUU TUUUU UUUUU UUU", isExt.toString())
                 val publishDate = cursor.getString(3)
                 val thumbnail = cursor.getBlob(4)
-//                val ranking = cursor.getInt(5)
-                val ranking = 1
+                val ranking = cursor.getInt(5)
+//                val ranking = 1
 
                 gameList.add(GameListResponse(id,  title, publishDate, thumbnail, ranking, isExt))
                 cursor.moveToNext()
@@ -147,6 +159,32 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         }
         db.close()
         return user
+    }
+
+    fun selectGamesAmount() : Int{
+        val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = false"
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(query, null)
+        var result = 0
+        if(cursor.moveToFirst()){
+            result = cursor.getInt(0)
+            cursor.close()
+        }
+        db.close()
+        return result
+    }
+
+    fun selectExtensionAmount() : Int{
+        val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = true"
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(query, null)
+        var result = 0
+        if(cursor.moveToFirst()){
+            result = cursor.getInt(0)
+            cursor.close()
+        }
+        db.close()
+        return result
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

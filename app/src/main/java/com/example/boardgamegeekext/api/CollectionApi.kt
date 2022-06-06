@@ -20,8 +20,8 @@ class Item @JvmOverloads constructor(
     @field:Element(name = "name")
     var name : String = "",
 
-    @field:Element(name = "yearpublished")
-    var year : String = "",
+    @field:Element(name = "yearpublished", required = false)
+    var year : String? = null,
 
     @field:Element(name = "stats")
     var stats : Stats? = null
