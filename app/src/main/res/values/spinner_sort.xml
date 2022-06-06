@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="sort_array">
-        <item>ID</item>
         <item>Tytuł</item>
         <item>Ranking</item>
         <item>Data wydania</item>

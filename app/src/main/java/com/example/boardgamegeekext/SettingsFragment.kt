@@ -44,7 +44,12 @@ class SettingsFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    lateinit var disabledEditTextEndDate : EditText
+
     lateinit var progressBar : ProgressBar
+
+    lateinit var dbHandler : DatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +71,7 @@ class SettingsFragment : Fragment() {
         val syncButton : Button = settingsView.findViewById(R.id.syncButton)
         val eraseButton : Button = settingsView.findViewById(R.id.eraseButton)
 
-        val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
+        dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         val user = dbHandler.selectUserInfo()
         val firstSync = dbHandler.selectFirstSyncInfo()
         val lastSync = dbHandler.selectLastSyncInfo()
@@ -95,7 +100,7 @@ class SettingsFragment : Fragment() {
         disabledEditTextStartDate.setText((startDateValue?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         disabledEditTextStartDate.isEnabled = false
 
-        val disabledEditTextEndDate : EditText = settingsView.findViewById(R.id.editDisabledEndDate)
+        disabledEditTextEndDate = settingsView.findViewById(R.id.editDisabledEndDate)
         val endDateValue = lastSync?.syncDate
         disabledEditTextEndDate.setText((endDateValue?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         disabledEditTextEndDate.isEnabled = false
@@ -104,6 +109,7 @@ class SettingsFragment : Fragment() {
         return settingsView
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun showDialog(nickname: String){
         val dialog : Dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -116,11 +122,17 @@ class SettingsFragment : Fragment() {
         deleteYes.setOnClickListener {
             dialog.dismiss()
             synchronizeGames(nickname, true)
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+            val lastSync = dbHandler.selectLastSyncInfo()
+            disabledEditTextEndDate.setText((lastSync?.syncDate?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         }
 
         deleteNo.setOnClickListener {
             dialog.dismiss()
             synchronizeGames(nickname, false)
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+            val lastSync = dbHandler.selectLastSyncInfo()
+            disabledEditTextEndDate.setText((lastSync?.syncDate?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         }
 
         dialog.show()

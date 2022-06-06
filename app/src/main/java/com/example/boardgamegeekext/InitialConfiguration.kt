@@ -116,9 +116,9 @@ class InitialConfiguration : AppCompatActivity() {
                     flag = true
 
                 } catch (e: Exception) {
-                    Thread.sleep(500)
+                    delay(3_000)
+                    Log.d("DUPA2", e.stackTraceToString())
                     getDetailedData(id)
-                    Log.d("DUPA", e.stackTraceToString())
                 }
             }
         }
@@ -221,6 +221,8 @@ class InitialConfiguration : AppCompatActivity() {
 
             override fun onFailure(call: Call<CollectionApi>, t: Throwable) {
                 Log.v("retrofit321", t.stackTraceToString())
+                Thread.sleep(1_000)
+                synchronizeGames(nickname)
             }
         })
     }
