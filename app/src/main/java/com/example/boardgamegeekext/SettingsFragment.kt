@@ -19,10 +19,7 @@ import com.example.boardgamegeekext.api.*
 import com.example.boardgamegeekext.database.Game
 import com.example.boardgamegeekext.database.HistoryRanking
 import com.example.boardgamegeekext.database.Synchronization
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -201,7 +198,11 @@ class SettingsFragment : Fragment() {
 
             override fun onFailure(call: Call<CollectionApi>, t: Throwable) {
                 Log.v("retrofit321", t.stackTraceToString())
-                Thread.sleep(1_000)
+                runBlocking {
+                    val job = launch(Dispatchers.Default) {
+                        delay(10_000)
+                    }
+                }
                 synchronizeGames(nickname, isDeleted)
             }
         })

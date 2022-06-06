@@ -180,6 +180,27 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         return user
     }
 
+    fun selectGameHistory(gameId: Int) : ArrayList<HistoryListResponse>{
+        val query = "SELECT $HISTORY_RANKING_POSITION, $SYNC_DATE FROM $HISTORY_TABLE_NAME INNER JOIN $SYNC_TABLE_NAME ON $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $SYNC_TABLE_NAME.$SYNC_ID WHERE $HISTORY_GAME_ID = $gameId ORDER BY $SYNC_TABLE_NAME.$SYNC_ID"
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(query, null)
+        var history: ArrayList<HistoryListResponse> = ArrayList()
+
+        if(cursor.moveToFirst()) {
+            while (!cursor.isAfterLast) {
+                val ranking = cursor.getInt(0)
+                val date = cursor.getString(1)
+
+                history.add(HistoryListResponse(ranking, date))
+                cursor.moveToNext()
+            }
+            cursor.close()
+        }
+
+        db.close()
+        return history
+    }
+
     fun selectGamesAmount() : Int{
         val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = false"
         val db = this.readableDatabase
@@ -256,6 +277,15 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
             this.thumbnail = thumbnail
             this.rank = rank
             this.isExtension = isExtension
+        }
+    }
+
+    class HistoryListResponse{
+        var rankPosition = 0
+        var syncDate = ""
+        constructor(rankPosition : Int, syncDate : String){
+            this.rankPosition = rankPosition
+            this.syncDate = syncDate
         }
     }
 

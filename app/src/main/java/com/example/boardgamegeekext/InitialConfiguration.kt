@@ -221,7 +221,11 @@ class InitialConfiguration : AppCompatActivity() {
 
             override fun onFailure(call: Call<CollectionApi>, t: Throwable) {
                 Log.v("retrofit321", t.stackTraceToString())
-                Thread.sleep(1_000)
+                runBlocking {
+                    val job = launch(Dispatchers.Default) {
+                        delay(1_000)
+                    }
+                }
                 synchronizeGames(nickname)
             }
         })

@@ -1,5 +1,6 @@
 package com.example.boardgamegeekext
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -12,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 
+
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "id"
@@ -20,13 +22,14 @@ private const val ARG_PARAM3 = "year"
 private const val ARG_PARAM4 = "isExt"
 private const val ARG_PARAM5 = "thumbnail"
 private const val ARG_PARAM6 = "rank"
+private const val ARG_PARAM7 = "idGame"
 
 /**
  * A simple [Fragment] subclass.
  * Use the [ListItemFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ListItemFragment : Fragment() {
+class ListItemFragment : Fragment(){
     // TODO: Rename and change types of parameters
     private var id: String? = null
     private var name: String? = null
@@ -34,6 +37,7 @@ class ListItemFragment : Fragment() {
     private var isExt: Boolean? = null
     private var thumbnail: ByteArray? = null
     private var rank : Int? = null
+    private var idGame : Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +48,7 @@ class ListItemFragment : Fragment() {
             isExt = it.getBoolean(ARG_PARAM4)
             thumbnail = it.getByteArray(ARG_PARAM5)
             rank = it.getInt(ARG_PARAM6)
+            idGame = it.getInt(ARG_PARAM7)
         }
     }
 
@@ -67,8 +72,6 @@ class ListItemFragment : Fragment() {
         idText.text = arguments?.getString("id") ?: "0."
 
         gameNameText.text = (arguments?.getString("name") + " (" + arguments?.getString("year") +")") ?: "Kawerna: Rolnicy z Jaskiń"
-
-        Log.d("SPRAWDZENIE", arguments?.getBoolean("isExt").toString())
 
         if(isExt == true){
             gameInfoText.text = "✅ dodatek"
@@ -116,6 +119,23 @@ class ListItemFragment : Fragment() {
             rankPositionText = "0"
         rankText.text = "\uD83C\uDFC6\n" + rankPositionText
 
+        Log.d("GGGGG", idGame.toString())
+
+        if(isExt == false){
+            itemView.setOnClickListener {
+                val intent = Intent(requireActivity(), HistoryActivity::class.java)
+                val b = Bundle()
+                b.putString("name", arguments?.getString("name")) //Your id
+                b.putString("year", arguments?.getString("year"))
+                b.putInt("idGame", idGame!!)
+
+                intent.putExtras(b) //Put your id to your next Intent
+
+                startActivity(intent)
+            }
+        }
+
+
         // Inflate the layout for this fragment
         return itemView
     }
@@ -149,7 +169,7 @@ class ListItemFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(id: String, name: String, year: String, isExt : Boolean, thumbnail : ByteArray, rank : Int) =
+        fun newInstance(id: String, name: String, year: String, isExt : Boolean, thumbnail : ByteArray, rank : Int, idGame : Int) =
             ListItemFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, id)
@@ -158,6 +178,7 @@ class ListItemFragment : Fragment() {
                     putBoolean(ARG_PARAM4, isExt)
                     putByteArray(ARG_PARAM5, thumbnail)
                     putInt(ARG_PARAM6, rank)
+                    putInt(ARG_PARAM7, idGame)
                 }
             }
     }

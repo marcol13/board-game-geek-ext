@@ -106,7 +106,7 @@ class ListFragment : Fragment() {
         for(i in 0 until displayedGames.size){
             var el = displayedGames.get(i)
             Log.d("MOŻE TU DZIALA", el.isExtension.toString())
-            var itemList = ListItemFragment.newInstance((i+1).toString() + ".", el.title, el.publishedDate, el.isExtension, el.thumbnail, el.rank)
+            var itemList = ListItemFragment.newInstance((i+1).toString() + ".", el.title, el.publishedDate, el.isExtension, el.thumbnail, el.rank, el.id)
 
             transaction?.add(ll.id, itemList, "tag")
         }
