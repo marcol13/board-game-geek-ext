@@ -50,6 +50,8 @@ class ListItemFragment : Fragment(){
             rank = it.getInt(ARG_PARAM6)
             idGame = it.getInt(ARG_PARAM7)
         }
+
+        savedInstanceState?.clear()
     }
 
     override fun onCreateView(

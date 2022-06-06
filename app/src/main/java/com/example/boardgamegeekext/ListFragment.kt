@@ -38,6 +38,8 @@ class ListFragment : Fragment() {
         val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         games = dbHandler.selectGamesList()
         displayedGames = games
+
+        savedInstanceState?.clear()
     }
 
     @SuppressLint("ResourceType")

@@ -51,7 +51,7 @@ class HistoryActivity : AppCompatActivity() {
 
         list.adapter = adapter
 
-
+        savedInstanceState?.clear();
         backButton.setOnClickListener { finish() }
     }
 

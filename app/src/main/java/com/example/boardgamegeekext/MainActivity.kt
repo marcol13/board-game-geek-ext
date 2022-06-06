@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         })
+        savedInstanceState?.clear();
     }
 
     private fun setCurrentFragment(fragment: Fragment) {

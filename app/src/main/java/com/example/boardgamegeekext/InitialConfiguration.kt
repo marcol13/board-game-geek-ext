@@ -54,17 +54,21 @@ class InitialConfiguration : AppCompatActivity() {
                 goToMainActivity()
             }
         }
+        savedInstanceState?.clear();
 
         goToApp.setOnClickListener(object: View.OnClickListener {
 
             override fun onClick(arg0: View?){
                 val nicknameText = nicknameEdit.text.toString()
-                progressBar.visibility = View.VISIBLE
-                var fetchUser = false
-                do{
-                    fetchUser = findUser(nicknameText)
-                    Thread.sleep(1_000)
-                }while(fetchUser)
+                if(nicknameText != ""){
+                    progressBar.visibility = View.VISIBLE
+                    var fetchUser = false
+                    do{
+                        fetchUser = findUser(nicknameText)
+                        Thread.sleep(1_000)
+                    }while(fetchUser)
+                }
+
 //                val dbHandler = DatabaseHelper(applicationContext, null, null, 1)
 //                val user = dbHandler.selectUserInfo()
 //                Log.d("UWAGA", userNickname)

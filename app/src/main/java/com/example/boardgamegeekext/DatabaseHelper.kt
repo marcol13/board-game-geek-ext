@@ -202,7 +202,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     }
 
     fun selectGamesAmount() : Int{
-        val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = false"
+        val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = 0"
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
         var result = 0
@@ -215,7 +215,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     }
 
     fun selectExtensionAmount() : Int{
-        val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = true"
+        val query = "SELECT COUNT(*) FROM $GAME_TABLE_NAME WHERE $GAME_IS_EXT = 1"
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
         var result = 0
