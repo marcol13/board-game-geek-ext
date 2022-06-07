@@ -125,15 +125,19 @@ class ListItemFragment : Fragment(){
 
         if(isExt == false){
             itemView.setOnClickListener {
-                val intent = Intent(requireActivity(), HistoryActivity::class.java)
+                var intent : Intent? = Intent(requireActivity(), HistoryActivity::class.java)
                 val b = Bundle()
+
                 b.putString("name", arguments?.getString("name")) //Your id
                 b.putString("year", arguments?.getString("year"))
                 b.putInt("idGame", idGame!!)
 
-                intent.putExtras(b) //Put your id to your next Intent
+                Log.d("QQQQQ", b.size().toString())
+
+                intent?.putExtras(b) //Put your id to your next Intent
 
                 startActivity(intent)
+                intent = null
             }
         }
 

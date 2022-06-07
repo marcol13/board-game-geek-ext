@@ -12,8 +12,15 @@ import androidx.appcompat.app.AppCompatActivity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
+import java.util.*
 
 class HistoryActivity : AppCompatActivity() {
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        savedInstanceState.clear()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
@@ -35,14 +42,14 @@ class HistoryActivity : AppCompatActivity() {
 
 //        val listItems = arrayOfNulls<String>(history.size)
 
-        val listItems: MutableList<HashMap<String, String>> = ArrayList()
+        val listItems: MutableList<TreeMap<String, String>> = ArrayList()
 
         val adapter = SimpleAdapter(this, listItems, R.layout.list_item, arrayOf("First Line", "Second Line"),
             intArrayOf(R.id.item_ranking, R.id.item_date))
 
         val iter: Iterator<*> = createMap(history).entries.iterator()
         while (iter.hasNext()) {
-            val resultsMap: HashMap<String, String> = HashMap()
+            val resultsMap: TreeMap<String, String> = TreeMap()
             val (key, value) = iter.next() as Map.Entry<*, *>
             resultsMap["First Line"] = value.toString()
             resultsMap["Second Line"] = key.toString()
@@ -51,19 +58,23 @@ class HistoryActivity : AppCompatActivity() {
 
         list.adapter = adapter
 
+        Log.d("UWU",savedInstanceState?.size().toString() )
+
         savedInstanceState?.clear();
         backButton.setOnClickListener { finish() }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createMap(arr :  ArrayList<DatabaseHelper.HistoryListResponse>) : HashMap<String, String>{
-        var result = HashMap<String, String>()
+    fun createMap(arr :  ArrayList<DatabaseHelper.HistoryListResponse>) : TreeMap<String, String> {
+        var result = TreeMap<String, String>()
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
         for(i in arr){
             Log.d("RRRRRR", i.syncDate)
-
+            var position = 0
+            if(i.rankPosition > 0)
+                position = i.rankPosition
             var tempDate = LocalDateTime.parse(i.syncDate, ISO_DATE_TIME)
-            result.put(tempDate.format(formatter), "🏆 ${i.rankPosition}")
+            result.put(tempDate.format(formatter), "🏆 $position")
         }
         return result
     }

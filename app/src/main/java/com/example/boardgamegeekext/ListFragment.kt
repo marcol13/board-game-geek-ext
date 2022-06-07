@@ -62,6 +62,8 @@ class ListFragment : Fragment() {
                 displayedGames = games.filter { !it.isExtension } as ArrayList<DatabaseHelper.GameListResponse>
             }
 
+            Log.d("SSSSSSSSSSSS", "LOL")
+
             displayGames(ll)
         }
 
@@ -83,6 +85,7 @@ class ListFragment : Fragment() {
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                Log.d("ZZZZZZZZZZZ", "LOL")
                 when(position){
                     0 -> displayedGames.sortWith(compareBy{ it.title })
                     1 -> displayedGames.sortWith(compareBy{ it.rank })

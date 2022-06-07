@@ -26,6 +26,7 @@ import retrofit2.Response
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -74,7 +75,15 @@ class SettingsFragment : Fragment() {
         val lastSync = dbHandler.selectLastSyncInfo()
 
         syncButton.setOnClickListener{
-            showDialog(user!!.nickname)
+            val nowDate = LocalDateTime.now()
+            if(ChronoUnit.HOURS.between(lastSync?.syncDate, nowDate) < 24){
+                showTimeDialog(user!!.nickname)
+            }
+            else{
+                showDialog(user!!.nickname)
+            }
+
+
         }
 
         eraseButton.setOnClickListener {
@@ -107,6 +116,28 @@ class SettingsFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+    fun showTimeDialog(nickname : String){
+        val dialog : Dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(true)
+        dialog.setContentView(R.layout.dialog_time)
+
+        val timeYes = dialog.findViewById<Button>(R.id.time_yes)
+        val timeNo = dialog.findViewById<Button>(R.id.time_no)
+
+        timeYes.setOnClickListener {
+            dialog.dismiss()
+            showDialog(nickname)
+        }
+
+        timeNo.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     fun showDialog(nickname: String){
         val dialog : Dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -120,16 +151,16 @@ class SettingsFragment : Fragment() {
             dialog.dismiss()
             synchronizeGames(nickname, true)
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            val lastSync = dbHandler.selectLastSyncInfo()
-            disabledEditTextEndDate.setText((lastSync?.syncDate?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
+            val lastSync = LocalDateTime.now()
+            disabledEditTextEndDate.setText((lastSync.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         }
 
         deleteNo.setOnClickListener {
             dialog.dismiss()
             synchronizeGames(nickname, false)
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            val lastSync = dbHandler.selectLastSyncInfo()
-            disabledEditTextEndDate.setText((lastSync?.syncDate?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
+            val lastSync = LocalDateTime.now()
+            disabledEditTextEndDate.setText((lastSync.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         }
 
         dialog.show()
@@ -246,9 +277,13 @@ class SettingsFragment : Fragment() {
                     flag = true
 
                 } catch (e: Exception) {
-                    Thread.sleep(500)
-                    getDetailedData(id)
                     Log.d("DUPA", e.stackTraceToString())
+                    runBlocking {
+                        val job = launch(Dispatchers.Default) {
+                            delay(10_000)
+                        }
+                    }
+                    getDetailedData(id)
                 }
             }
         }

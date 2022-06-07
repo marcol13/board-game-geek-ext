@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="24sp"
+        android:layout_marginBottom="16dp"
+        android:textAlignment="center"
+        android:text="Czy na pewno chcesz synchronizować dane?"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="12sp"
+        android:layout_marginBottom="16dp"
+        android:textAlignment="center"
+        android:text="Ostatnia synchronizacja mniej niż 24 godzin temu"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/time_yes"
+            android:layout_width= "wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="Tak"/>
+
+        <Button
+            android:id="@+id/time_no"
+            android:layout_width= "wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="Nie"/>
+
+    </LinearLayout>
+</LinearLayout>

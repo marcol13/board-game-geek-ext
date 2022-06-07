@@ -1,20 +1,14 @@
 package com.example.boardgamegeekext
 
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.app.PendingIntent.getActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.EditText
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.boardgamegeekext.api.RetrofitInstance
-import com.example.boardgamegeekext.api.UserApi
-import com.example.boardgamegeekext.database.User
+import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.navigation.NavigationBarView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,9 +18,16 @@ class MainActivity : AppCompatActivity() {
     private val settingsFragment = SettingsFragment()
     private val listFragment = ListFragment()
 
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        savedInstanceState.clear()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Log.d("UWU2",savedInstanceState?.size().toString() )
 
 //        val intent = Intent(this, InitialConfiguration::class.java)
 //        startActivity(intent)
@@ -42,6 +43,8 @@ class MainActivity : AppCompatActivity() {
 
         setCurrentFragment(homeFragment)
 
+//        R.id.nav_home.onNavDestinationSelected()
+
         bottomNavigation.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener {
             when(it.itemId){
                 R.id.nav_home -> setCurrentFragment(homeFragment)
@@ -50,8 +53,16 @@ class MainActivity : AppCompatActivity() {
             }
             true
         })
+
+//        bottomNavigation.onNavDest
+
         savedInstanceState?.clear();
     }
+
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        return item.onNavDestinationSelected(navController) || super.onOptionsItemSelected(item)
+//    }
 
     private fun setCurrentFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().apply {

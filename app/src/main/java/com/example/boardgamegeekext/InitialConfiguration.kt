@@ -23,6 +23,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.net.URL
 import java.time.LocalDateTime
+import com.gu.toolargetool.TooLargeTool;
 
 
 class InitialConfiguration : AppCompatActivity() {
@@ -42,6 +43,8 @@ class InitialConfiguration : AppCompatActivity() {
         registerInWebsite = findViewById(R.id.go_to_website_initial_button)
         nicknameEdit = findViewById(R.id.nick_name_initial_edit)
         progressBar = findViewById(R.id.initial_progress_bar)
+
+        TooLargeTool.startLogging(application);
 
         val flag = intent.getStringExtra("ERASE_DATA")
         if (!flag.equals("true")) {
@@ -120,7 +123,7 @@ class InitialConfiguration : AppCompatActivity() {
                     flag = true
 
                 } catch (e: Exception) {
-                    delay(3_000)
+                    delay(10_000)
                     Log.d("DUPA2", e.stackTraceToString())
                     getDetailedData(id)
                 }
