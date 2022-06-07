@@ -23,7 +23,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.net.URL
 import java.time.LocalDateTime
-import com.gu.toolargetool.TooLargeTool;
 
 class InitialConfiguration : AppCompatActivity() {
 
@@ -40,8 +39,6 @@ class InitialConfiguration : AppCompatActivity() {
         registerInWebsite = findViewById(R.id.go_to_website_initial_button)
         nicknameEdit = findViewById(R.id.nick_name_initial_edit)
         progressBar = findViewById(R.id.initial_progress_bar)
-
-        TooLargeTool.startLogging(application);
 
         val flag = intent.getStringExtra("ERASE_DATA")
         if (!flag.equals("true")) {
@@ -129,15 +126,14 @@ class InitialConfiguration : AppCompatActivity() {
                 call: Call<CollectionApi>,
                 response: Response<CollectionApi>
             ) {
-
-                val name = response.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
-                val gamesResponse = response.body()?.itemList
-                val nextId = dbHandler.selectNextSyncIndex()
-
-                val synchronization = Synchronization(LocalDateTime.now())
-                dbHandler.addSync(synchronization)
-
                 try{
+//                    val name = response.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
+                    val gamesResponse = response.body()?.itemList
+                    val nextId = dbHandler.selectNextSyncIndex()
+
+                    val synchronization = Synchronization(LocalDateTime.now())
+                    dbHandler.addSync(synchronization)
+
                     if(response.body()?.amount?.toInt()!! > 0){
                         for(i in gamesResponse?.indices!!){
                             val el = gamesResponse[i]

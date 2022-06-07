@@ -161,14 +161,14 @@ class SettingsFragment : Fragment() {
                 call: Call<CollectionApi>,
                 response: Response<CollectionApi>
             ) {
-                val name = response.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
-                val gamesResponse = response.body()?.itemList
-                val nextId = dbHandler.selectNextSyncIndex()
-
-                val synchronization = Synchronization(LocalDateTime.now())
-                dbHandler.addSync(synchronization)
-
                 try{
+//                    val name = response.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
+                    val gamesResponse = response.body()?.itemList
+                    val nextId = dbHandler.selectNextSyncIndex()
+
+                    val synchronization = Synchronization(LocalDateTime.now())
+                    dbHandler.addSync(synchronization)
+
                     if(response.body()?.amount?.toInt()!! > 0) {
                         for (i in gamesResponse?.indices!!) {
                             val el = gamesResponse[i]
