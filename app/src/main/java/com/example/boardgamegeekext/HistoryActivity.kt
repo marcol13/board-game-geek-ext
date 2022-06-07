@@ -28,19 +28,15 @@ class HistoryActivity : AppCompatActivity() {
         val b = intent.extras
 
         val dbHandler = DatabaseHelper(applicationContext, null, null, 1)
-        var history = dbHandler.selectGameHistory(b!!.getInt("idGame"))
+        val history = dbHandler.selectGameHistory(b!!.getInt("idGame"))
 
         val gameName = findViewById<TextView>(R.id.game_title)
         val gameYear = findViewById<TextView>(R.id.game_year)
         val backButton = findViewById<Button>(R.id.back_button)
         val list = findViewById<ListView>(R.id.list_history)
 
-        gameName.text = b?.getString("name")
+        gameName.text = b.getString("name")
         gameYear.text = "(${b?.getString("year")})"
-
-        Log.d("GGGGG", b?.getInt("idGame").toString())
-
-//        val listItems = arrayOfNulls<String>(history.size)
 
         val listItems: MutableList<TreeMap<String, String>> = ArrayList()
 
@@ -58,23 +54,20 @@ class HistoryActivity : AppCompatActivity() {
 
         list.adapter = adapter
 
-        Log.d("UWU",savedInstanceState?.size().toString() )
-
         savedInstanceState?.clear();
         backButton.setOnClickListener { finish() }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun createMap(arr :  ArrayList<DatabaseHelper.HistoryListResponse>) : TreeMap<String, String> {
-        var result = TreeMap<String, String>()
+        val result = TreeMap<String, String>()
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
         for(i in arr){
-            Log.d("RRRRRR", i.syncDate)
             var position = 0
             if(i.rankPosition > 0)
                 position = i.rankPosition
-            var tempDate = LocalDateTime.parse(i.syncDate, ISO_DATE_TIME)
-            result.put(tempDate.format(formatter), "🏆 $position")
+            val tempDate = LocalDateTime.parse(i.syncDate, ISO_DATE_TIME)
+            result[tempDate.format(formatter)] = "🏆 $position"
         }
         return result
     }

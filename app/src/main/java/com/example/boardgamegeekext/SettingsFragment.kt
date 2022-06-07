@@ -9,10 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.boardgamegeekext.api.*
@@ -28,18 +25,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [SettingsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SettingsFragment : Fragment() {
-    // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
 
@@ -82,8 +71,6 @@ class SettingsFragment : Fragment() {
             else{
                 showDialog(user!!.nickname)
             }
-
-
         }
 
         eraseButton.setOnClickListener {
@@ -92,12 +79,9 @@ class SettingsFragment : Fragment() {
             startActivity(intent)
         }
 
-
-
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
         val disabledEditTextNick : EditText = settingsView.findViewById(R.id.editDisabledNick)
-//        disabledEditTextNick.text = (user?.nickname ?: "nickname") as Editable?
         disabledEditTextNick.setText((user?.nickname ?: "nickname"), TextView.BufferType.EDITABLE);
         disabledEditTextNick.isEnabled = false
 
@@ -111,13 +95,12 @@ class SettingsFragment : Fragment() {
         disabledEditTextEndDate.setText((endDateValue?.format(formatter) ?: "27.05.2022"), TextView.BufferType.EDITABLE)
         disabledEditTextEndDate.isEnabled = false
 
-        // Inflate the layout for this fragment
         return settingsView
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun showTimeDialog(nickname : String){
-        val dialog : Dialog = Dialog(requireContext())
+        val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(true)
         dialog.setContentView(R.layout.dialog_time)
@@ -139,7 +122,7 @@ class SettingsFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun showDialog(nickname: String){
-        val dialog : Dialog = Dialog(requireContext())
+        val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(true)
         dialog.setContentView(R.layout.dialog)
@@ -167,8 +150,8 @@ class SettingsFragment : Fragment() {
     }
 
     fun synchronizeGames(nickname : String, isDeleted : Boolean){
-        var games : ArrayList<Game> = ArrayList()
-        var ranks  : ArrayList<HistoryRanking> = ArrayList()
+        val games : ArrayList<Game> = ArrayList()
+        val ranks  : ArrayList<HistoryRanking> = ArrayList()
         progressBar.visibility = View.VISIBLE
         val dbHandler = DatabaseHelper(requireContext(), null, null, 1)
         RetrofitInstance.api.getCollection(nickname, "1").enqueue(object : Callback<CollectionApi> {
@@ -178,59 +161,83 @@ class SettingsFragment : Fragment() {
                 call: Call<CollectionApi>,
                 response: Response<CollectionApi>
             ) {
-                var name = response?.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
-                val gamesResponse = response?.body()?.itemList
+                val name = response.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
+                val gamesResponse = response.body()?.itemList
                 val nextId = dbHandler.selectNextSyncIndex()
 
                 val synchronization = Synchronization(LocalDateTime.now())
                 dbHandler.addSync(synchronization)
-//
-                for(i in gamesResponse?.indices!!){
-                    var el = gamesResponse.get(i)
-                    var resultData = getDetailedData(el.objectid)
-                    var imageData = ByteArray(0)
-                    var isExtension = false
-                    var rankPositionList = el.stats?.rating?.ranks?.rank
-                    var rankingPosition = getRanking(rankPositionList!!)
 
-                    Log.d("TU MOZE BYC COS ZLE", resultData[0])
+                try{
+                    if(response.body()?.amount?.toInt()!! > 0) {
+                        for (i in gamesResponse?.indices!!) {
+                            val el = gamesResponse[i]
+                            val resultData = getDetailedData(el.objectid)
+                            var imageData = ByteArray(0)
+                            var isExtension = false
+                            val rankPositionList = el.stats?.rating?.ranks?.rank
+                            val rankingPosition = getRanking(rankPositionList!!)
 
-                    if(resultData[0] != ""){
-                        runBlocking {
-                            val job: Job = launch(Dispatchers.Default) {
-                                try{
-                                    imageData = loadImage(resultData[0])
-                                }catch(e: Exception){
-                                    imageData = ByteArray(0)
+                            if (resultData[0] != "") {
+                                runBlocking {
+                                    launch(Dispatchers.Default) {
+                                        imageData = try {
+                                            loadImage(resultData[0])
+                                        } catch (e: Exception) {
+                                            ByteArray(0)
+                                        }
+                                    }
                                 }
                             }
+                            if (resultData[1] == "boardgameexpansion") {
+                                isExtension = true
+                            }
+                            games.add(
+                                Game(
+                                    el.objectid.toInt(),
+                                    el.name,
+                                    isExtension,
+                                    el.year ?: "-1",
+                                    imageData
+                                )
+                            )
+                            ranks.add(
+                                HistoryRanking(
+                                    el.objectid.toInt(),
+                                    nextId,
+                                    rankingPosition
+                                )
+                            )
+                        }
+                        if (isDeleted) {
+                            dbHandler.clearGames()
+                        }
+                        games.forEach { el -> dbHandler.addGame(el) }
+                        ranks.forEach { el -> dbHandler.addHistory(el) }
+                    }
+                    else{
+                        if (isDeleted) {
+                            dbHandler.clearGames()
                         }
                     }
-                    Log.d("CAN WE SKIP", resultData[1])
-                    if(resultData[1] == "boardgameexpansion"){
-                        Log.d("QWERTY", "CCCCCCCCC")
-                        isExtension = true
+                }catch(e: Exception){
+                    runBlocking {
+                        launch(Dispatchers.Default) {
+                            delay(3_000)
+                        }
                     }
-                    Log.d("TO THE GOOD PART", isExtension.toString())
-                    games.add(Game(el.objectid.toInt(), el.name, isExtension, el.year ?: "-1", imageData))
-                    Log.d("ABDER", "${el.objectid} ${nextId} ${rankingPosition}")
-                    ranks.add(HistoryRanking(el.objectid.toInt(), nextId!!, rankingPosition))
+                    synchronizeGames(nickname, isDeleted)
                 }
-                if(isDeleted){
-                    dbHandler.clearGames()
-                }
-                games.forEach{el -> dbHandler.addGame(el)}
-                ranks.forEach{el -> dbHandler.addHistory(el)}
 
                 progressBar.visibility = View.GONE
-
-                Log.d("SIEMA2137", name)
+                val toast = Toast.makeText(requireContext(), "Dane zostały zsynchronizowane", Toast.LENGTH_LONG)
+                toast.show()
             }
 
             override fun onFailure(call: Call<CollectionApi>, t: Throwable) {
                 Log.v("retrofit321", t.stackTraceToString())
                 runBlocking {
-                    val job = launch(Dispatchers.Default) {
+                    launch(Dispatchers.Default) {
                         delay(10_000)
                     }
                 }
@@ -240,8 +247,8 @@ class SettingsFragment : Fragment() {
     }
 
     fun getRanking(rankPositionList : List<RankInstance>) : Int{
-        for(j in 0 until (rankPositionList?.size!!)){
-            var temp = rankPositionList.get(j)
+        for(j in 0 until (rankPositionList.size)){
+            val temp = rankPositionList[j]
             var result = -1
             if(temp.type == "subtype")
                 result = try{
@@ -259,27 +266,23 @@ class SettingsFragment : Fragment() {
         var thumbnail = ""
         var type = ""
 
-        var apiService : ApiRequest = RetrofitInstance.api
-        var call : Call<DetailedGameDataApi> = apiService.getDetailedGameData(id)
+        val apiService : ApiRequest = RetrofitInstance.api
+        val call : Call<DetailedGameDataApi> = apiService.getDetailedGameData(id)
 
         runBlocking {
-            val job: Job = launch(Dispatchers.Default) {
+            launch(Dispatchers.Default) {
 
                 try {
-                    var response: Response<DetailedGameDataApi> = call.execute()
-                    Log.d("DUPA", "teraz jest git")
-                    thumbnail = response?.body()?.name?.thumbnail.toString()
-                    type = response?.body()?.name?.type.toString()
-                    Log.d("RESPONSE", response.toString())
+                    val response: Response<DetailedGameDataApi> = call.execute()
+                    thumbnail = response.body()?.name?.thumbnail.toString()
+                    type = response.body()?.name?.type.toString()
                     if(response.code() != 200){
                         throw Exception()
                     }
                     flag = true
-
                 } catch (e: Exception) {
-                    Log.d("DUPA", e.stackTraceToString())
                     runBlocking {
-                        val job = launch(Dispatchers.Default) {
+                        launch(Dispatchers.Default) {
                             delay(10_000)
                         }
                     }
@@ -287,7 +290,6 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
-        Log.d("TU COS", "HALOOOO")
         if(!flag){
             return arrayListOf("", "")
         }
@@ -305,15 +307,6 @@ class SettingsFragment : Fragment() {
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SettingsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             SettingsFragment().apply {

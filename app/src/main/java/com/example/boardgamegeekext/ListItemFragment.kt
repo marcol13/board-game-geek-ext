@@ -13,9 +13,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "id"
 private const val ARG_PARAM2 = "name"
 private const val ARG_PARAM3 = "year"
@@ -24,11 +21,6 @@ private const val ARG_PARAM5 = "thumbnail"
 private const val ARG_PARAM6 = "rank"
 private const val ARG_PARAM7 = "idGame"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ListItemFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ListItemFragment : Fragment(){
     // TODO: Rename and change types of parameters
     private var id: String? = null
@@ -60,15 +52,10 @@ class ListItemFragment : Fragment(){
     ): View? {
 
         val itemView : View = inflater.inflate(R.layout.fragment_list_item, container, false)
-
         val idText : TextView = itemView.findViewById(R.id.list_index)
-
         val gameNameText : TextView = itemView.findViewById(R.id.game_name)
-
         val gameInfoText : TextView = itemView.findViewById(R.id.game_info)
-
         val thumbnailImageView : ImageView = itemView.findViewById(R.id.game_thumbnail)
-
         val rankText : TextView = itemView.findViewById(R.id.rank_position)
 
         idText.text = arguments?.getString("id") ?: "0."
@@ -87,32 +74,7 @@ class ListItemFragment : Fragment(){
             options.inPurgeable = true
             options.inInputShareable = true
 
-            Log.d("NIE DZIALA", arguments?.getByteArray("thumbnail")!!.size.toString())
-
             val bm = BitmapFactory.decodeByteArray(arguments?.getByteArray("thumbnail"), 0, arguments?.getByteArray("thumbnail")!!.size, options);
-//            thumbnailImageView.setImageBitmap(Bitmap.createScaledBitmap(bm, 100, 100, true));
-            lateinit var dstBmp : Bitmap
-            if (bm.getWidth() >= bm.getHeight()){
-
-                dstBmp = Bitmap.createBitmap(
-                    bm,
-                    bm.getWidth()/2 - bm.getHeight()/2,
-                    0,
-                    bm.getHeight(),
-                    bm.getHeight()
-                );
-
-            }else{
-
-                dstBmp = Bitmap.createBitmap(
-                    bm,
-                    0,
-                    bm.getHeight()/2 - bm.getWidth()/2,
-                    bm.getWidth(),
-                    bm.getWidth()
-                );
-            }
-
             thumbnailImageView.setImageBitmap(bm);
         }
 
@@ -121,60 +83,26 @@ class ListItemFragment : Fragment(){
             rankPositionText = "0"
         rankText.text = "\uD83C\uDFC6\n" + rankPositionText
 
-        Log.d("GGGGG", idGame.toString())
-
         if(isExt == false){
             itemView.setOnClickListener {
-                var intent : Intent? = Intent(requireActivity(), HistoryActivity::class.java)
+                val intent : Intent? = Intent(requireActivity(), HistoryActivity::class.java)
                 val b = Bundle()
 
-                b.putString("name", arguments?.getString("name")) //Your id
+                b.putString("name", arguments?.getString("name"))
                 b.putString("year", arguments?.getString("year"))
                 b.putInt("idGame", idGame!!)
 
-                Log.d("QQQQQ", b.size().toString())
-
-                intent?.putExtras(b) //Put your id to your next Intent
+                intent?.putExtras(b)
 
                 startActivity(intent)
-                intent = null
             }
         }
 
-
-        // Inflate the layout for this fragment
         return itemView
     }
 
-    fun getResizedBitmap(bm: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
-        val width = bm.width
-        val height = bm.height
-        val scaleWidth = newWidth.toFloat() / width
-        val scaleHeight = newHeight.toFloat() / height
-        // CREATE A MATRIX FOR THE MANIPULATION
-        val matrix = Matrix()
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight)
-
-        // "RECREATE" THE NEW BITMAP
-        val resizedBitmap = Bitmap.createBitmap(
-            bm, 0, 0, width, height, matrix, false
-        )
-        bm.recycle()
-        return resizedBitmap
-    }
-
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ListItemFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
+       @JvmStatic
         fun newInstance(id: String, name: String, year: String, isExt : Boolean, thumbnail : ByteArray, rank : Int, idGame : Int) =
             ListItemFragment().apply {
                 arguments = Bundle().apply {

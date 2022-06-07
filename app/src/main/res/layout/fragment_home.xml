@@ -95,6 +95,15 @@
                 android:orientation="vertical"
                 android:layout_weight="0.55">
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="80dp"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:text="Baw się dobrze! 😃"/>
+
             </LinearLayout>
 
         </LinearLayout>

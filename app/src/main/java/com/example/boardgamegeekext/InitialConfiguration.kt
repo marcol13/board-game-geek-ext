@@ -25,15 +25,12 @@ import java.net.URL
 import java.time.LocalDateTime
 import com.gu.toolargetool.TooLargeTool;
 
-
 class InitialConfiguration : AppCompatActivity() {
 
     private lateinit var goToApp : Button
     lateinit var registerInWebsite : Button
     lateinit var nicknameEdit : EditText
     lateinit var progressBar : ProgressBar
-
-    var userNickname = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +46,7 @@ class InitialConfiguration : AppCompatActivity() {
         val flag = intent.getStringExtra("ERASE_DATA")
         if (!flag.equals("true")) {
             val dbHandler = DatabaseHelper(applicationContext, null, null, 1)
-            val db =dbHandler.writableDatabase
+//            val db =dbHandler.writableDatabase
 //            dbHandler.onUpgrade(db, 1, 1)
 //            dbHandler.clearDatabase()
             val user = dbHandler.selectUserInfo()
@@ -71,19 +68,10 @@ class InitialConfiguration : AppCompatActivity() {
                         Thread.sleep(1_000)
                     }while(fetchUser)
                 }
-
-//                val dbHandler = DatabaseHelper(applicationContext, null, null, 1)
-//                val user = dbHandler.selectUserInfo()
-//                Log.d("UWAGA", userNickname)
-//                synchronizeGames(userNickname)
-
-
             }
-
         })
 
         registerInWebsite.setOnClickListener(object : View.OnClickListener {
-
             var uriUrl = Uri.parse("https://boardgamegeek.com")
             var launchBrowser = Intent(Intent.ACTION_VIEW, uriUrl)
 
@@ -104,55 +92,26 @@ class InitialConfiguration : AppCompatActivity() {
         var thumbnail = ""
         var type = ""
 
-        var apiService : ApiRequest = RetrofitInstance.api
-        var call : Call<DetailedGameDataApi> = apiService.getDetailedGameData(id)
+        val apiService : ApiRequest = RetrofitInstance.api
+        val call : Call<DetailedGameDataApi> = apiService.getDetailedGameData(id)
 
         runBlocking {
-            val job: Job = launch(Dispatchers.Default) {
-
+            launch(Dispatchers.Default) {
                 try {
-                    var response: Response<DetailedGameDataApi> = call.execute()
-                    Log.d("DUPA", "teraz jest git")
-                    thumbnail = response?.body()?.name?.thumbnail.toString()
-                    type = response?.body()?.name?.type.toString()
-                    Log.d("RESPONSE", response.toString())
+                    val response: Response<DetailedGameDataApi> = call.execute()
+                    thumbnail = response.body()?.name?.thumbnail.toString()
+                    type = response.body()?.name?.type.toString()
                     if(response.code() != 200){
                         throw Exception()
                     }
-                    Log.d("SIEMA22222", type)
                     flag = true
-
                 } catch (e: Exception) {
-                    delay(10_000)
-                    Log.d("DUPA2", e.stackTraceToString())
+                    delay(3_000)
                     getDetailedData(id)
                 }
             }
         }
 
-
-
-//        runBlocking{
-//            val job : Job = launch {
-//                RetrofitInstance.api.getDetailedGameData(id)
-//                    .enqueue(object : Callback<DetailedGameDataApi> {
-//                        override fun onResponse(
-//                            call: Call<DetailedGameDataApi>,
-//                            response: Response<DetailedGameDataApi>
-//                        ) {
-//                            thumbnail = response?.body()?.name?.thumbnail.toString()
-//                            type = response?.body()?.name?.type.toString()
-//                            Log.d("SIEMA22222", type)
-//                            flag = true
-//                        }
-//
-//                        override fun onFailure(call: Call<DetailedGameDataApi>, t: Throwable) {
-//                            Log.v("retrofit", t.stackTrace.toString())
-//                        }
-//                    })
-//            }
-//        }
-        Log.d("TU COS", "HALOOOO")
         if(!flag){
             return arrayListOf("", "")
         }
@@ -160,76 +119,76 @@ class InitialConfiguration : AppCompatActivity() {
     }
 
     fun synchronizeGames(nickname : String){
-        var games : ArrayList<Game> = ArrayList()
-        var ranks  : ArrayList<HistoryRanking> = ArrayList()
+        val games : ArrayList<Game> = ArrayList()
+        val ranks  : ArrayList<HistoryRanking> = ArrayList()
         val dbHandler = DatabaseHelper(applicationContext, null, null, 1)
         RetrofitInstance.api.getCollection(nickname, "1").enqueue(object : Callback<CollectionApi> {
 
-//            @RequiresApi(Build.VERSION_CODES.O)
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onResponse(
                 call: Call<CollectionApi>,
                 response: Response<CollectionApi>
             ) {
-                var name = response?.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
-                val gamesResponse = response?.body()?.itemList
+
+                val name = response.body()?.itemList?.get(1)?.stats?.rating?.ranks?.rank?.get(0)?.value.toString()
+                val gamesResponse = response.body()?.itemList
                 val nextId = dbHandler.selectNextSyncIndex()
 
                 val synchronization = Synchronization(LocalDateTime.now())
                 dbHandler.addSync(synchronization)
-//
-                for(i in gamesResponse?.indices!!){
-                    var el = gamesResponse.get(i)
-                    var resultData = getDetailedData(el.objectid)
-                    var imageData = ByteArray(0)
-                    var isExtension = false
-                    var rankPositionList = el.stats?.rating?.ranks?.rank
-                    var rankingPosition = getRanking(rankPositionList!!)
 
-                    Log.d("TU MOZE BYC COS ZLE", resultData[0])
+                try{
+                    if(response.body()?.amount?.toInt()!! > 0){
+                        for(i in gamesResponse?.indices!!){
+                            val el = gamesResponse[i]
+                            val resultData = getDetailedData(el.objectid)
+                            var imageData = ByteArray(0)
+                            var isExtension = false
+                            val rankPositionList = el.stats?.rating?.ranks?.rank
+                            val rankingPosition = getRanking(rankPositionList!!)
 
-                    if(resultData[0] != ""){
-                        runBlocking {
-                            val job: Job = launch(Dispatchers.Default) {
-                                try{
-                                    imageData = loadImage(resultData[0])
-                                }catch(e: Exception){
-                                    imageData = ByteArray(0)
+                            if(resultData[0] != ""){
+                                runBlocking {
+                                    launch(Dispatchers.Default) {
+                                        imageData = try{
+                                            loadImage(resultData[0])
+                                        }catch(e: Exception){
+                                            ByteArray(0)
+                                        }
+                                    }
                                 }
                             }
+
+                            if(resultData[1] == "boardgameexpansion"){
+                                isExtension = true
+                            }
+
+                            games.add(Game(el.objectid.toInt(), el.name, isExtension, el.year ?: "-1", imageData))
+                            ranks.add(HistoryRanking(el.objectid.toInt(), nextId, rankingPosition))
+                        }
+
+                        games.forEach{el -> dbHandler.addGame(el)}
+                        ranks.forEach{el -> dbHandler.addHistory(el)}
+                    }
+
+                    progressBar.visibility = View.GONE
+
+                    goToMainActivity()
+
+                }catch(e: Exception){
+                    runBlocking {
+                        launch(Dispatchers.Default) {
+                            delay(3_000)
                         }
                     }
-                    Log.d("CAN WE SKIP", resultData[1])
-                    if(resultData[1] == "boardgameexpansion"){
-                        Log.d("QWERTY", "CCCCCCCCC")
-                        isExtension = true
-                    }
-                    Log.d("TO THE GOOD PART", isExtension.toString())
-                    games.add(Game(el.objectid.toInt(), el.name, isExtension, el.year ?: "-1", imageData))
-                    Log.d("ABDER", "${el.objectid} ${nextId} ${rankingPosition}")
-                    ranks.add(HistoryRanking(el.objectid.toInt(), nextId!!, rankingPosition))
+                    synchronizeGames(nickname)
                 }
-                games.forEach{el -> dbHandler.addGame(el)}
-                ranks.forEach{el -> dbHandler.addHistory(el)}
-
-                progressBar.visibility = View.GONE
-
-                goToMainActivity()
-
-////                var detailedResponse = ArrayList()
-//
-//                gamesResponse?.forEach { getDetailedData(it.objectid) }
-//
-
-
-//                var name = response?.body()?.amount.toString()
-                Log.d("SIEMA2137", name)
             }
 
             override fun onFailure(call: Call<CollectionApi>, t: Throwable) {
                 Log.v("retrofit321", t.stackTraceToString())
                 runBlocking {
-                    val job = launch(Dispatchers.Default) {
+                    launch(Dispatchers.Default) {
                         delay(1_000)
                     }
                 }
@@ -243,9 +202,14 @@ class InitialConfiguration : AppCompatActivity() {
         lateinit var user : User
         RetrofitInstance.api.getUser(nickname).enqueue(object : Callback<UserApi> {
 
-
             override fun onFailure(call: Call<UserApi>?, t: Throwable?) {
                 Log.v("retrofit", "call failed")
+                runBlocking {
+                    launch(Dispatchers.Default) {
+                        delay(3_000)
+                    }
+                }
+                findUser(nickname)
             }
 
             @RequiresApi(Build.VERSION_CODES.O)
@@ -253,42 +217,27 @@ class InitialConfiguration : AppCompatActivity() {
                 val name = response?.body()?.name?.name.toString()
                 val nickname = response?.body()?.nickname.toString()
                 val image = response?.body()?.avatar?.avatar.toString()
-                Log.d("SIEMA", nickname)
                 if(nickname == ""){
-                    Log.d("SIEMA2", nickname)
                     val toast = Toast.makeText(applicationContext, "Nie znaleziono użytkownika", Toast.LENGTH_LONG)
                     toast.show()
+                    progressBar.visibility = View.GONE
                 }
                 else{
                     runBlocking {
-                        val job = launch(Dispatchers.Default){
-                            lateinit var avatar : ByteArray
-                            if(image != "" && image != "N/A"){
-                                Log.d("SIEMA", image)
-                                avatar = loadImage(image)
-                                Log.d("SIEMA", "sukces")
-                            }
-                            else{
-                                avatar = ByteArray(0)
+                        launch(Dispatchers.Default){
+                            val avatar : ByteArray = if(image != "" && image != "N/A"){
+                                loadImage(image)
+                            } else{
+                                ByteArray(0)
                             }
 
                             user = User(name, nickname, avatar)
 
-//                            val synchronization = Synchronization(LocalDateTime.now())
-//                            val dateFormat = SimpleDateTimeFormat("yyyy-MM-dd HH:mm:ss")
-//                            Log.d("SIEMA2", synchronization.syncDate.toString())
-//                            Log.d("SIEMA3", dateFormat.format(synchronization.syncDate))
-
-
                             val dbHandler = DatabaseHelper(applicationContext, null, null, 1)
                             dbHandler.clearDatabase()
                             dbHandler.addUser(user)
-                            Log.d("UWAGA2", nickname)
+
                             synchronizeGames(nickname)
-//                            dbHandler.addSync(synchronization)
-
-
-//                            goToMainActivity()
                         }
                     }
                     flag = true
@@ -299,8 +248,8 @@ class InitialConfiguration : AppCompatActivity() {
     }
 
     fun getRanking(rankPositionList : List<RankInstance>) : Int{
-        for(j in 0 until (rankPositionList?.size!!)){
-            var temp = rankPositionList.get(j)
+        for(j in 0 until (rankPositionList.size)){
+            val temp = rankPositionList[j]
             var result = -1
             if(temp.type == "subtype")
                 result = try{
@@ -322,5 +271,4 @@ class InitialConfiguration : AppCompatActivity() {
         InputStream.close()
         return result
     }
-
 }

@@ -10,16 +10,9 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ListFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ListFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -51,7 +44,7 @@ class ListFragment : Fragment() {
 
         val ll = LinearLayout(requireActivity())
         ll.orientation = LinearLayout.VERTICAL
-        ll.setId(12345);
+        ll.id = 12345;
         
         val switch : Switch = listView.findViewById(R.id.extensions_switch)
 
@@ -61,8 +54,6 @@ class ListFragment : Fragment() {
             } else {
                 displayedGames = games.filter { !it.isExtension } as ArrayList<DatabaseHelper.GameListResponse>
             }
-
-            Log.d("SSSSSSSSSSSS", "LOL")
 
             displayGames(ll)
         }
@@ -79,13 +70,12 @@ class ListFragment : Fragment() {
             spinner.adapter = adapter
         }
 
-        spinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                Log.d("ZZZZZZZZZZZ", "LOL")
                 when(position){
                     0 -> displayedGames.sortWith(compareBy{ it.title })
                     1 -> displayedGames.sortWith(compareBy{ it.rank })
@@ -93,10 +83,7 @@ class ListFragment : Fragment() {
                 }
                 displayGames(ll)
             }
-
         }
-
-//        displayGames(ll)
 
         scrollContainer.addView(ll)
 
@@ -109,9 +96,8 @@ class ListFragment : Fragment() {
         val transaction = fragmentManager?.beginTransaction()
 
         for(i in 0 until displayedGames.size){
-            var el = displayedGames.get(i)
-            Log.d("MOŻE TU DZIALA", el.isExtension.toString())
-            var itemList = ListItemFragment.newInstance((i+1).toString() + ".", el.title, el.publishedDate, el.isExtension, el.thumbnail, el.rank, el.id)
+            val el = displayedGames[i]
+            val itemList = ListItemFragment.newInstance((i+1).toString() + ".", el.title, el.publishedDate, el.isExtension, el.thumbnail, el.rank, el.id)
 
             transaction?.add(ll.id, itemList, "tag")
         }
@@ -119,15 +105,6 @@ class ListFragment : Fragment() {
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ListFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             ListFragment().apply {

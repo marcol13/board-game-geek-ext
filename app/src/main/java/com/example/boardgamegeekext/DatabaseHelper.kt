@@ -13,8 +13,6 @@ import com.example.boardgamegeekext.database.Game
 import com.example.boardgamegeekext.database.HistoryRanking
 import com.example.boardgamegeekext.database.Synchronization
 import com.example.boardgamegeekext.database.User
-import java.lang.Exception
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -44,7 +42,6 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     }
 
     fun addGame(game: Game){
-//        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val values = ContentValues()
         values.put(GAME_ID, game.id)
         values.put(GAME_TITLE_ORIGINAL, game.title)
@@ -53,18 +50,14 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         values.put(GAME_IMG_THUMB, game.thumbnail)
         val db = this.writableDatabase
         try{
-//            @Insert(onConflict = OnConflictStrategy.REPLACE)
-//            db.insert(GAME_TABLE_NAME, null, values)
             db.insertWithOnConflict(GAME_TABLE_NAME, null, values, CONFLICT_REPLACE)
         }catch(e: SQLiteConstraintException){
-            Log.d("BLAD", "COS NIE DZIALA")
+            Log.d("BLAD", "Konflikt id")
         }
-
         db.close()
     }
 
     fun addSync(sync: Synchronization){
-//        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val values = ContentValues()
         values.put(SYNC_DATE, sync.syncDate.toString())
         val db = this.writableDatabase
@@ -105,7 +98,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         db?.execSQL("DELETE FROM $GAME_TABLE_NAME")
     }
 
-    fun selectLastRanking(gameId : Int) : Int{
+    private fun selectLastRanking(gameId : Int) : Int{
         val query = "SELECT $HISTORY_RANKING_POSITION FROM $HISTORY_TABLE_NAME WHERE $HISTORY_GAME_ID = $gameId ORDER BY $HISTORY_SYNC_ID DESC LIMIT 1"
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
@@ -123,7 +116,6 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
         var nextId = 0
-
         if(cursor.moveToFirst()){
             nextId = cursor.getInt(0)
             cursor.close()
@@ -133,26 +125,18 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
     }
 
     fun selectGamesList() : ArrayList<GameListResponse>{
-        val syncId = selectNextSyncIndex() - 1
-        Log.d("DEEBUG2115", syncId.toString())
-//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
-//        val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB, $HISTORY_RANKING_POSITION FROM $GAME_TABLE_NAME INNER JOIN $HISTORY_TABLE_NAME ON $GAME_TABLE_NAME.$GAME_ID = $HISTORY_TABLE_NAME.$HISTORY_GAME_ID WHERE $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $syncId"
         val query = "SELECT $GAME_TABLE_NAME.$GAME_ID, $GAME_TITLE_ORIGINAL, $GAME_IS_EXT, $GAME_PUBLISH_DATE, $GAME_IMG_THUMB FROM $GAME_TABLE_NAME"
         val db = this.readableDatabase
-        Log.d("UUUUU", query)
         val cursor = db.rawQuery(query, null)
-        var gameList = ArrayList<GameListResponse>()
+        val gameList = ArrayList<GameListResponse>()
         if(cursor.moveToFirst()) {
             while (!cursor.isAfterLast) {
-                Log.d("DEBUG001", "AAAAAAAAAAAAAAA")
                 val id = cursor.getInt(0)
                 val title = cursor.getString(1)
                 val isExt = cursor.getInt(2) > 0
-                Log.d("TUUUU TUUUU UUUUU UUU", isExt.toString())
                 val publishDate = cursor.getString(3)
                 val thumbnail = cursor.getBlob(4)
                 val ranking = selectLastRanking(id)
-//                val ranking = 1
 
                 gameList.add(GameListResponse(id,  title, publishDate, thumbnail, ranking, isExt))
                 cursor.moveToNext()
@@ -173,6 +157,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
             val name = cursor.getString(1)
             val nickname = cursor.getString(2)
             val image = cursor.getBlob(3)
+
             user = User(name, nickname, image)
             cursor.close()
         }
@@ -184,7 +169,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         val query = "SELECT $HISTORY_RANKING_POSITION, $SYNC_DATE FROM $HISTORY_TABLE_NAME INNER JOIN $SYNC_TABLE_NAME ON $HISTORY_TABLE_NAME.$HISTORY_SYNC_ID = $SYNC_TABLE_NAME.$SYNC_ID WHERE $HISTORY_GAME_ID = $gameId ORDER BY $SYNC_TABLE_NAME.$SYNC_ID"
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
-        var history: ArrayList<HistoryListResponse> = ArrayList()
+        val history: ArrayList<HistoryListResponse> = ArrayList()
 
         if(cursor.moveToFirst()) {
             while (!cursor.isAfterLast) {
@@ -206,6 +191,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
         var result = 0
+
         if(cursor.moveToFirst()){
             result = cursor.getInt(0)
             cursor.close()
@@ -219,6 +205,7 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
         var result = 0
+
         if(cursor.moveToFirst()){
             result = cursor.getInt(0)
             cursor.close()
@@ -236,8 +223,8 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
 
         if(cursor.moveToFirst()){
             val syncDate = cursor.getString(1)
-//            val formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             val formatter : DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
+
             sync = Synchronization(LocalDateTime.parse(syncDate, formatter))
             cursor.close()
         }
@@ -254,8 +241,8 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
 
         if(cursor.moveToFirst()){
             val syncDate = cursor.getString(1)
-//            val formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             val formatter : DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
+
             sync = Synchronization(LocalDateTime.parse(syncDate, formatter))
             cursor.close()
         }
@@ -263,56 +250,41 @@ class DatabaseHelper(context: Context, name: String?, factory: SQLiteDatabase.Cu
         return sync
     }
 
-    class GameListResponse{
-        var id = 0
-        var title = ""
-        var publishedDate = "2022"
-        var thumbnail = ByteArray(0)
-        var rank = -1
-        var isExtension = false
-        constructor(id : Int, title : String, publishedDate : String, thumbnail : ByteArray, rank : Int, isExtension : Boolean){
-            this.id = id
-            this.title = title
-            this.publishedDate = publishedDate
-            this.thumbnail = thumbnail
-            this.rank = rank
-            this.isExtension = isExtension
-        }
-    }
+    class GameListResponse(
+        var id: Int,
+        var title: String,
+        var publishedDate: String,
+        var thumbnail: ByteArray,
+        var rank: Int,
+        var isExtension: Boolean
+    )
 
-    class HistoryListResponse{
-        var rankPosition = 0
-        var syncDate = ""
-        constructor(rankPosition : Int, syncDate : String){
-            this.rankPosition = rankPosition
-            this.syncDate = syncDate
-        }
-    }
+    class HistoryListResponse(var rankPosition: Int, var syncDate: String)
 
     companion object {
-        private val DATABASE_NAME : String = "BoardGames.db"
-        private val DATABASE_VERSION : Int = 1
+        private const val DATABASE_NAME : String = "BoardGames.db"
+        private const val DATABASE_VERSION : Int = 1
 
-        val GAME_TABLE_NAME = "games"
-        val GAME_ID = "_id"
-        val GAME_TITLE_ORIGINAL = "game_english_title"
-        val GAME_IS_EXT = "game_is_extension"
-        val GAME_PUBLISH_DATE = "game_publish_date"
-        val GAME_IMG_THUMB = "game_image_thumbnail"
+        const val GAME_TABLE_NAME = "games"
+        const val GAME_ID = "_id"
+        const val GAME_TITLE_ORIGINAL = "game_english_title"
+        const val GAME_IS_EXT = "game_is_extension"
+        const val GAME_PUBLISH_DATE = "game_publish_date"
+        const val GAME_IMG_THUMB = "game_image_thumbnail"
 
-        val SYNC_TABLE_NAME = "sync"
-        val SYNC_ID = "_id"
-        val SYNC_DATE = "sync_date"
+        const val SYNC_TABLE_NAME = "sync"
+        const val SYNC_ID = "_id"
+        const val SYNC_DATE = "sync_date"
 
-        val HISTORY_TABLE_NAME = "history"
-        val HISTORY_GAME_ID = "history_game_id"
-        val HISTORY_SYNC_ID = "history_sync_id"
-        val HISTORY_RANKING_POSITION = "history_ranking_position"
+        const val HISTORY_TABLE_NAME = "history"
+        const val HISTORY_GAME_ID = "history_game_id"
+        const val HISTORY_SYNC_ID = "history_sync_id"
+        const val HISTORY_RANKING_POSITION = "history_ranking_position"
 
-        val USER_TABLE_NAME = "user"
-        val USER_ID = "_id"
-        val USER_NAME = "user_name"
-        val USER_NICK = "user_nick"
-        val USER_IMAGE = "user_image"
+        const val USER_TABLE_NAME = "user"
+        const val USER_ID = "_id"
+        const val USER_NAME = "user_name"
+        const val USER_NICK = "user_nick"
+        const val USER_IMAGE = "user_image"
     }
 }

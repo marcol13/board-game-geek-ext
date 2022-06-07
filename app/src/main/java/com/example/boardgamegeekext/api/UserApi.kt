@@ -17,9 +17,6 @@ data class UserApi @JvmOverloads constructor(
 
     @field:Attribute(name = "name", required = true)
     var nickname: String? = "",
-
-
-
 )
 
 @Root(name = "firstname", strict = false)

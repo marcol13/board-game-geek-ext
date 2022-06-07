@@ -4,7 +4,7 @@ import org.simpleframework.xml.*
 
 @Root(name="items", strict = false)
 class CollectionApi @JvmOverloads constructor(
-    @field: ElementList(inline = true)
+    @field: ElementList(inline = true, required=false)
     var itemList: List<Item>? = null,
 
     @field:Attribute(name="totalitems")
